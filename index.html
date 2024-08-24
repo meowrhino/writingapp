@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página para Escribir</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #f0efe5;
+            /* Color de fondo más suave, similar al papel */
+            background-image: radial-gradient(#bfae9d 0.5px, #f0efe5 0.5px);
+            background-size: 15px 15px;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            transition: background 0.5s ease;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: #4b3f31;
+        }
+
+        /* Contenedor principal */
+        .container {
+            background-color: rgba(255, 255, 245, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Estilos de los inputs */
+        .input-container {
+            background-color: #4b3f31;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        label {
+            color: #f8f1e5;
+            font-size: 18px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 97%;
+            padding: 10px;
+            background-color: #f8f1e5;
+            color: #4b3f31;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        /* Botones centrados */
+        button {
+            padding: 12px 24px;
+            background-color: #d1a77d;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px auto;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #b28560;
+            transform: translateY(-3px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Estilos del área de texto */
+        textarea {
+            width: 95%;
+            height: 250px;
+            padding: 15px;
+            background-color: #f8f5e4;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            resize: none;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea:disabled {
+            background-color: #f1eee2;
+            border-color: #b3b3b3;
+        }
+
+        /* Estilos de los contadores */
+        .counters,
+        .time-tracker {
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            color: #4b3f31;
+        }
+
+        .counter {
+            display: inline-block;
+            margin-right: 15px;
+            font-size: 16px;
+        }
+
+        .negative {
+            color: red;
+        }
+
+        .positive {
+            color: green;
+        }
+
+        /* Estilos de los contadores de emojis */
+        .emoji-counters {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            font-size: 24px;
+        }
+
+        .emoji-counters div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #writingSection{
+            width: 800px;height: 600px;
+            display: hidden;
+        } 
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Página para Escribir</h1>
+
+        <div class="input-container">
+            <label for="title">Título:</label>
+            <input type="text" id="title" placeholder="Escribe el título">
+
+            <label for="goal">Objetivo de caracteres:</label>
+            <input type="number" id="goal" placeholder="Cantidad de caracteres">
+        </div>
+
+        <button id="startButton">Comenzar a escribir</button>
+
+        <div class="hidden" id="writingSection">
+            <h2 id="startTime">Empezaste a escribir a las 14:22:32</h2>
+            <textarea id="writingArea" placeholder="Comienza a escribir..." class="paused" disabled=""></textarea>
+
+            <div class="counters">
+                <div class="counter">Objetivo: <span id="goalCount">1020</span></div>
+                <div class="counter">Escritos: <span id="writtenCount">18</span></div>
+                <div class="counter">Diferencia: <span id="differenceCount" class="negative">-1002</span></div>
+            </div>
+
+            <div class="time-tracker">
+                Tiempo: <span id="timeSpent">21</span> segundos
+            </div>
+
+            <div class="buttons" style="text-align: center">
+
+            <button id="pauseResumeButton" class="hidden">Reanudar</button>
+            <button id="stopButton" class="hidden">Parar</button>
+
+            <!-- Botones de Des-parar e Imprimir ocultos por defecto, se mostrarán al parar -->
+            <button id="unstopButton" class="">Des-parar</button>
+            <button id="printButton" class="">Imprimir</button>
+        </div>
+        </div>
+
+        <!-- Contadores de pausas y paradas usando solo emojis -->
+        <div class="emoji-counters">
+            <div><span id="pauseCounter"></span></div>
+            <div><span id="stopCounter"></span></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Variables globales
+        let isWriting = false;
+        let startTime;
+        let interval;
+        let writtenChars = 0;
+        let timesStopped = 0;
+        let timesPaused = 0;
+        let accumulatedTime = 0;
+        let pausedTimeStart = 0;
+        let isPaused = false;
+
+        const startButton = document.getElementById("startButton");
+        const pauseResumeButton = document.getElementById("pauseResumeButton");
+        const stopButton = document.getElementById("stopButton");
+        const unstopButton = document.getElementById("unstopButton");
+        const printButton = document.getElementById("printButton");
+        const writingArea = document.getElementById("writingArea");
+        const writingSection = document.getElementById("writingSection");
+        const startTimeDisplay = document.getElementById("startTime");
+        const timeSpentDisplay = document.getElementById("timeSpent");
+        const goalCountDisplay = document.getElementById("goalCount");
+        const writtenCountDisplay = document.getElementById("writtenCount");
+        const differenceCountDisplay = document.getElementById("differenceCount");
+
+        // Función para iniciar la escritura
+        startButton.addEventListener("click", () => {
+            const title = document.getElementById("title").value;
+            const goal = document.getElementById("goal").value;
+
+            // Validaciones para asegurar que el título y el objetivo son válidos
+            if (!title || goal <= 0) {
+                alert("Por favor, ingresa un título y un objetivo de caracteres válido.");
+                return;
+            }
+
+            // Mostrar la sección de escritura
+            writingSection.classList.remove("hidden");
+            startButton.classList.add("hidden");
+
+            // Mostrar la hora de inicio
+            startTime = new Date();
+            startTimeDisplay.textContent = `Empezaste a escribir a las ${startTime.toLocaleTimeString()}`;
+
+            // Habilitar el área de escritura
+            writingArea.disabled = false;
+            isWriting = true;
+
+            // Iniciar contador de tiempo
+            interval = setInterval(updateTime, 1000);
+
+            // Actualizar objetivo
+            goalCountDisplay.textContent = goal;
+            updateCharacterCounts();
+        });
+
+        // Función de Pausar/Reanudar
+        pauseResumeButton.addEventListener("click", () => {
+            if (isWriting) {
+                // Pausar
+                clearInterval(interval);
+                isPaused = true;
+                pausedTimeStart = new Date();  // Marcamos el tiempo en que se pausa
+                writingArea.classList.add("paused");
+                writingArea.disabled = true;
+                pauseResumeButton.textContent = "Reanudar";
+                timesPaused++;
+                displayPauseStopCount();
+            } else {
+                // Reanudar
+                accumulatedTime += new Date() - pausedTimeStart;  // Sumar solo el tiempo en pausa
+                interval = setInterval(updateTime, 1000);
+                writingArea.classList.remove("paused");
+                writingArea.disabled = false;
+                pauseResumeButton.textContent = "Pausa";
+                isPaused = false;
+            }
+            isWriting = !isWriting;
+        });
+
+        // Función para parar la escritura
+        stopButton.addEventListener("click", () => {
+            clearInterval(interval);
+            writingArea.disabled = true;
+
+            // Sumar el tiempo acumulado solo si se detiene desde una reanudación
+            if (!isPaused) {
+                accumulatedTime += new Date() - startTime;
+            }
+
+            stopButton.classList.add("hidden");
+            pauseResumeButton.classList.add("hidden");
+
+            // Mostrar botones de des-parar e imprimir
+            unstopButton.classList.remove("hidden");
+            printButton.classList.remove("hidden");
+
+            timesStopped++;
+            displayPauseStopCount();
+        });
+
+        // Función para mostrar contadores de pausas y paradas
+        function displayPauseStopCount() {
+            const pauseDisplay = "⏸️".repeat(timesPaused);
+            const stopDisplay = "⏹️".repeat(timesStopped);
+            document.getElementById('pauseCounter').textContent = pauseDisplay;
+            document.getElementById('stopCounter').textContent = stopDisplay;
+        }
+
+        // Función para des-parar la escritura
+        unstopButton.addEventListener("click", () => {
+            unstopButton.classList.add("hidden");
+            printButton.classList.add("hidden");
+
+            stopButton.classList.remove("hidden");
+            pauseResumeButton.classList.remove("hidden");
+
+            writingArea.disabled = false;
+            interval = setInterval(updateTime, 1000);
+        });
+
+        // Función para manejar el área de escritura
+        writingArea.addEventListener("input", updateCharacterCounts);
+
+        function updateCharacterCounts() {
+            const goal = parseInt(goalCountDisplay.textContent);
+            writtenChars = writingArea.value.length;
+
+            writtenCountDisplay.textContent = writtenChars;
+
+            const difference = writtenChars - goal;
+            differenceCountDisplay.textContent = difference;
+
+            if (difference >= 0) {
+                differenceCountDisplay.classList.remove("negative");
+                differenceCountDisplay.classList.add("positive");
+            } else {
+                differenceCountDisplay.classList.remove("positive");
+                differenceCountDisplay.classList.add("negative");
+            }
+        }
+
+        // Función para actualizar el contador de tiempo
+        function updateTime() {
+            const currentTime = new Date();
+            const timeSpent = Math.floor((currentTime - startTime + accumulatedTime) / 1000);
+            timeSpentDisplay.textContent = timeSpent;
+        }
+
+        // Función para imprimir (copiar como HTML)
+        printButton.addEventListener("click", () => {
+            const title = document.getElementById("title").value;
+            const content = writingArea.value.replace(/\n/g, "<br>");
+            const endTime = new Date();  // Momento en que se imprime
+
+            // Convertimos accumulatedTime de milisegundos a segundos correctamente
+            const totalTime = Math.floor((endTime - startTime + accumulatedTime) / 1000);
+
+            const output = `
+        <article class="escrito">
+            <h3 class="titulo">${title}</h3>
+            <p>${content}</p>
+            <div class="data">
+                <small class="date">Creado: ${startTime.toLocaleString()}</small>
+                <small class="date">Parado: ${endTime.toLocaleString()}</small>
+                <small class="pauses">Pausas: ${timesPaused}</small>
+                <small class="stops">Paradas: ${timesStopped}</small>
+                <small class="time">Tiempo total: ${totalTime} segundos</small>
+                <small class="goal">Objetivo de caracteres: ${goalCountDisplay.textContent}</small>
+                <small class="written">Caracteres escritos: ${writtenChars}</small>
+                <small class="difference">Diferencia: ${differenceCountDisplay.textContent}</small>
+            </div>
+        </article>
+    `;
+
+            navigator.clipboard.writeText(output);
+            alert("Contenido copiado al portapapeles como HTML.");
+        });
+
+    </script>
+
+</body>
+
+</html>
