@@ -33,7 +33,7 @@
         .container {
             background-color: rgba(255, 255, 245, 0.95);
             border-radius: 15px;
-            padding: 40px;
+            padding: 25px 40px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             width: 90%;
             max-width: 1000px;
@@ -151,51 +151,52 @@
             gap: 10px;
         }
 
-        #writingSection{
+        #writingSection {
             width: 800px;
             display: hidden;
-        } 
+        }
     </style>
 </head>
 
 <body>
 
     <div class="container">
-        <h1>Página para Escribir</h1>
+
+        <h2 id="startTime"></h2>
 
         <div class="input-container">
-            <label for="title">Título:</label>
-            <input type="text" id="title" placeholder="Escribe el título">
+            <label for="title"></label>
+            <input type="text" id="title" placeholder="text title">
 
-            <label for="goal">Objetivo de caracteres:</label>
-            <input type="number" id="goal" placeholder="Cantidad de caracteres">
+            <label for="goal"></label>
+            <input type="number" id="goal" placeholder="text lenght">
         </div>
 
-        <button id="startButton">Comenzar a escribir</button>
+        <button id="startButton">start writing</button>
 
         <div class="hidden" id="writingSection">
-            <h2 id="startTime">Empezaste a escribir a las 14:22:32</h2>
-            <textarea id="writingArea" placeholder="Comienza a escribir..." class="paused" disabled=""></textarea>
+
+            <textarea id="writingArea" placeholder="..." class="paused" disabled=""></textarea>
 
             <div class="counters">
-                <div class="counter">Objetivo: <span id="goalCount">1020</span></div>
-                <div class="counter">Escritos: <span id="writtenCount">18</span></div>
-                <div class="counter">Diferencia: <span id="differenceCount" class="negative">-1002</span></div>
+                <div class="counter">goal: <span id="goalCount"></span></div>
+                <div class="counter">written: <span id="writtenCount"></span></div>
+                <div class="counter">left: <span id="differenceCount"></span></div>
             </div>
 
             <div class="time-tracker">
-                Tiempo: <span id="timeSpent">21</span> segundos
+                <span id="timeSpent"></span>
             </div>
 
             <div class="buttons" style="text-align: center">
 
-            <button id="pauseResumeButton" class="hidden">Reanudar</button>
-            <button id="stopButton" class="hidden">Parar</button>
+                <button id="pauseResumeButton">pause</button>
+                <button id="stopButton">stop</button>
 
-            <!-- Botones de Des-parar e Imprimir ocultos por defecto, se mostrarán al parar -->
-            <button id="unstopButton" class="">Des-parar</button>
-            <button id="printButton" class="">Imprimir</button>
-        </div>
+                <!-- Botones de Des-parar e Imprimir ocultos por defecto, se mostrarán al parar -->
+                <button id="unstopButton" class="hidden">go back</button>
+                <button id="printButton" class="hidden">print</button>
+            </div>
         </div>
 
         <!-- Contadores de pausas y paradas usando solo emojis -->
@@ -232,14 +233,20 @@
         const differenceCountDisplay = document.getElementById("differenceCount");
 
         // Función para iniciar la escritura
+        //coge los valores de title y goal 
         startButton.addEventListener("click", () => {
-            const title = document.getElementById("title").value;
-            const goal = document.getElementById("goal").value;
+            let title = document.getElementById("title").value;
+            let goal = document.getElementById("goal").value;
 
-            // Validaciones para asegurar que el título y el objetivo son válidos
-            if (!title || goal <= 0) {
-                alert("Por favor, ingresa un título y un objetivo de caracteres válido.");
-                return;
+            //y si no los tiene los pone en 0
+            if (!title) {
+                title = "";
+                console.log(`title is + ${title}`);
+            }
+
+            if (goal <= 0) {
+                goal = 0;
+                console.log(`goal is + ${goal}`);
             }
 
             // Mostrar la sección de escritura
@@ -248,7 +255,7 @@
 
             // Mostrar la hora de inicio
             startTime = new Date();
-            startTimeDisplay.textContent = `Empezaste a escribir a las ${startTime.toLocaleTimeString()}`;
+            startTimeDisplay.textContent = `${startTime.toLocaleTimeString()}`;
 
             // Habilitar el área de escritura
             writingArea.disabled = false;
@@ -256,12 +263,13 @@
 
             // Iniciar contador de tiempo
             interval = setInterval(updateTime, 1000);
+            const start = performance.now();
 
             // Actualizar objetivo
             goalCountDisplay.textContent = goal;
             updateCharacterCounts();
         });
-
+        
         // Función de Pausar/Reanudar
         pauseResumeButton.addEventListener("click", () => {
             if (isWriting) {
@@ -271,7 +279,7 @@
                 pausedTimeStart = new Date();  // Marcamos el tiempo en que se pausa
                 writingArea.classList.add("paused");
                 writingArea.disabled = true;
-                pauseResumeButton.textContent = "Reanudar";
+                pauseResumeButton.textContent = "un-pause";
                 timesPaused++;
                 displayPauseStopCount();
             } else {
@@ -280,7 +288,7 @@
                 interval = setInterval(updateTime, 1000);
                 writingArea.classList.remove("paused");
                 writingArea.disabled = false;
-                pauseResumeButton.textContent = "Pausa";
+                pauseResumeButton.textContent = "pause";
                 isPaused = false;
             }
             isWriting = !isWriting;
@@ -349,10 +357,23 @@
         }
 
         // Función para actualizar el contador de tiempo
+
+        function secondsToHms(d) {
+            d = Number(d);
+            var h = Math.floor(d / 3600);
+            var m = Math.floor(d % 3600 / 60);
+            var s = Math.floor(d % 3600 % 60);
+
+            var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+            var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+            var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+            return hDisplay + mDisplay + sDisplay;
+        }
+
         function updateTime() {
             const currentTime = new Date();
             const timeSpent = Math.floor((currentTime - startTime + accumulatedTime) / 1000);
-            timeSpentDisplay.textContent = timeSpent;
+            timeSpentDisplay.textContent = secondsToHms(timeSpent);
         }
 
         // Función para imprimir (copiar como HTML)
