@@ -110,8 +110,8 @@
         }
 
         textarea:disabled {
-            background-color: #f1eee2;
-            border-color: #b3b3b3;
+            background-color: #b7b6b3;
+            border-color: #b7b6b3;
         }
 
         /* Estilos de los contadores */
@@ -155,6 +155,19 @@
             width: 800px;
             display: hidden;
         }
+
+        /*quitar las arrows del input de numeros para que cuando lo centres se centre bien*/
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 
@@ -195,14 +208,13 @@
 
                 <!-- Botones de Des-parar e Imprimir ocultos por defecto, se mostrarán al parar -->
                 <button id="unstopButton" class="hidden">go back</button>
+                <button id="copyButton" class="hidden">copy text</button>
                 <button id="printButton" class="hidden">print</button>
             </div>
         </div>
 
         <!-- Contadores de pausas y paradas usando solo emojis -->
-        <div class="emoji-counters">
-            <div><span id="pauseCounter"></span></div>
-            <div><span id="stopCounter"></span></div>
+        <div id="emoji-counters">
         </div>
 
     </div>
@@ -210,20 +222,19 @@
     <script>
         // Variables globales
         let isWriting = false;
-        let startTime;
-        let interval;
-        let writtenChars = 0;
-        let timesStopped = 0;
-        let timesPaused = 0;
-        let accumulatedTime = 0;
-        let pausedTimeStart = 0;
         let isPaused = false;
+
+        let startTime;
+        let negativelostTime
+
+        let writtenChars = 0;
 
         const startButton = document.getElementById("startButton");
         const pauseResumeButton = document.getElementById("pauseResumeButton");
         const stopButton = document.getElementById("stopButton");
         const unstopButton = document.getElementById("unstopButton");
         const printButton = document.getElementById("printButton");
+        const copyButton = document.getElementById("copyButton");
         const writingArea = document.getElementById("writingArea");
         const writingSection = document.getElementById("writingSection");
         const startTimeDisplay = document.getElementById("startTime");
@@ -232,22 +243,42 @@
         const writtenCountDisplay = document.getElementById("writtenCount");
         const differenceCountDisplay = document.getElementById("differenceCount");
 
+        let timesPausedArr = new Array();
+        let timesUnPausedArr = new Array();
+        let timesStoppedArr = new Array();
+        let timesUnStoppedArr = new Array();
+
+
         // Función para iniciar la escritura
         //coge los valores de title y goal 
         startButton.addEventListener("click", () => {
+
             let title = document.getElementById("title").value;
             let goal = document.getElementById("goal").value;
+
+            //molaria que ya que te lo pone en negrita también te lo ponga separado en los miles
+            //igual los de abajo también
+            //document.getElementById("goal").value = goal.toLocaleString
 
             //y si no los tiene los pone en 0
             if (!title) {
                 title = "";
-                console.log(`title is + ${title}`);
             }
 
             if (goal <= 0) {
                 goal = 0;
-                console.log(`goal is + ${goal}`);
             }
+
+            //centrar y hacer bold el titulo y el objetivo
+            document.getElementById('title').style.textAlign = 'center';
+            document.getElementById('goal').style.textAlign = 'center';
+            document.getElementById('title').style.fontWeight = 'bold';
+            document.getElementById('goal').style.fontWeight = 'bold';
+            document.getElementById('title').readOnly = 'readonly';
+            document.getElementById('goal').readOnly = 'readonly';
+
+
+
 
             // Mostrar la sección de escritura
             writingSection.classList.remove("hidden");
@@ -261,33 +292,41 @@
             writingArea.disabled = false;
             isWriting = true;
 
-            // Iniciar contador de tiempo
-            interval = setInterval(updateTime, 1000);
-            const start = performance.now();
-
             // Actualizar objetivo
             goalCountDisplay.textContent = goal;
             updateCharacterCounts();
         });
-        
+
         // Función de Pausar/Reanudar
         pauseResumeButton.addEventListener("click", () => {
+
             if (isWriting) {
                 // Pausar
-                clearInterval(interval);
+                timesPausedArr.push(new Date());
+
+                //apuntamos donde hemos pausado
+                document.getElementById('writingArea').value += `\n\npausado a las ${new Date().toISOString().split(".")[0].slice(11)}\n`;
+
                 isPaused = true;
-                pausedTimeStart = new Date();  // Marcamos el tiempo en que se pausa
+
                 writingArea.classList.add("paused");
                 writingArea.disabled = true;
+
                 pauseResumeButton.textContent = "un-pause";
-                timesPaused++;
-                displayPauseStopCount();
+
+                document.getElementById('emoji-counters').textContent += "⏸️";
             } else {
                 // Reanudar
-                accumulatedTime += new Date() - pausedTimeStart;  // Sumar solo el tiempo en pausa
-                interval = setInterval(updateTime, 1000);
+                timesUnPausedArr.push(new Date());
+
+                //apuntamos donde hemos despausado
+                document.getElementById('writingArea').value += `des-pausado a las ${new Date().toISOString().split(".")[0].slice(11)}\n`;
+
+                isPaused = true;
+
                 writingArea.classList.remove("paused");
                 writingArea.disabled = false;
+
                 pauseResumeButton.textContent = "pause";
                 isPaused = false;
             }
@@ -296,43 +335,41 @@
 
         // Función para parar la escritura
         stopButton.addEventListener("click", () => {
-            clearInterval(interval);
+            timesStoppedArr.push(new Date());
+
+            //apuntamos donde hemos parado
+            document.getElementById('writingArea').value += `\n\nparado a las ${new Date().toISOString().split(".")[0].slice(11)}\n`;
+
             writingArea.disabled = true;
-
-            // Sumar el tiempo acumulado solo si se detiene desde una reanudación
-            if (!isPaused) {
-                accumulatedTime += new Date() - startTime;
-            }
-
             stopButton.classList.add("hidden");
             pauseResumeButton.classList.add("hidden");
 
-            // Mostrar botones de des-parar e imprimir
+            // Mostrar botones de des-parar, copiar e imprimir
             unstopButton.classList.remove("hidden");
+            copyButton.classList.remove("hidden");
             printButton.classList.remove("hidden");
 
-            timesStopped++;
-            displayPauseStopCount();
+            document.getElementById('emoji-counters').textContent += "⏹️";
         });
-
-        // Función para mostrar contadores de pausas y paradas
-        function displayPauseStopCount() {
-            const pauseDisplay = "⏸️".repeat(timesPaused);
-            const stopDisplay = "⏹️".repeat(timesStopped);
-            document.getElementById('pauseCounter').textContent = pauseDisplay;
-            document.getElementById('stopCounter').textContent = stopDisplay;
-        }
 
         // Función para des-parar la escritura
         unstopButton.addEventListener("click", () => {
+            timesUnStoppedArr.push(new Date());
+
+            //apuntamos donde hemos des-parado
+            document.getElementById('writingArea').value += `des-parado a las ${new Date().toISOString().split(".")[0].slice(11)}\n`;
+
             unstopButton.classList.add("hidden");
+            copyButton.classList.add("hidden");
             printButton.classList.add("hidden");
 
             stopButton.classList.remove("hidden");
             pauseResumeButton.classList.remove("hidden");
 
+            //para que cuando lo des-pares pero siga pausado no se abra el writingArea
+            if (isPaused === false) {
             writingArea.disabled = false;
-            interval = setInterval(updateTime, 1000);
+        }
         });
 
         // Función para manejar el área de escritura
@@ -356,8 +393,7 @@
             }
         }
 
-        // Función para actualizar el contador de tiempo
-
+        // Función para dar formato a los segundos (horas minutos segundos)
         function secondsToHms(d) {
             d = Number(d);
             var h = Math.floor(d / 3600);
@@ -370,10 +406,23 @@
             return hDisplay + mDisplay + sDisplay;
         }
 
-        function updateTime() {
-            const currentTime = new Date();
-            const timeSpent = Math.floor((currentTime - startTime + accumulatedTime) / 1000);
-            timeSpentDisplay.textContent = secondsToHms(timeSpent);
+        function calculateNegativeLostTime() {
+            negativelostTime = 0;
+
+            if (timesUnPausedArr.length > 0) {
+
+                for (let i = 1; i <= timesUnPausedArr.length; i++) {
+                    negativelostTime += Math.floor((timesPausedArr[i - 1] - timesUnPausedArr[i - 1]) / 1000);
+                }
+            }
+
+            if (timesUnStoppedArr.length > 0) {
+                for (let i = 1; i <= timesUnStoppedArr.length; i++) {
+                    negativelostTime += Math.floor((timesStoppedArr[i - 1] - timesUnStoppedArr[i - 1]) / 1000);
+                }
+            }
+
+            return negativelostTime;
         }
 
         // Función para imprimir (copiar como HTML)
@@ -382,10 +431,18 @@
             const content = writingArea.value.replace(/\n/g, "<br>");
             const endTime = new Date();  // Momento en que se imprime
 
-            // Convertimos accumulatedTime de milisegundos a segundos correctamente
-            const totalTime = Math.floor((endTime - startTime + accumulatedTime) / 1000);
+            // Convertimos totaltime de milisegundos a segundos correctamente
+            const totalTime = secondsToHms(Math.floor((endTime - startTime) / 1000));
+
+            calculateNegativeLostTime();
+
+            const realTime = secondsToHms(Math.floor((endTime - startTime) / 1000) + negativelostTime);
+            let timesStopped = timesUnStoppedArr.length;
+            let timesPaused = timesPausedArr.length;
+
 
             const output = `
+            
         <article class="escrito">
             <h3 class="titulo">${title}</h3>
             <p>${content}</p>
@@ -394,7 +451,8 @@
                 <small class="date">Parado: ${endTime.toLocaleString()}</small>
                 <small class="pauses">Pausas: ${timesPaused}</small>
                 <small class="stops">Paradas: ${timesStopped}</small>
-                <small class="time">Tiempo total: ${totalTime} segundos</small>
+                <small class="time">Tiempo total: ${totalTime}</small>
+                <small class="time">Tiempo real: ${realTime}</small>
                 <small class="goal">Objetivo de caracteres: ${goalCountDisplay.textContent}</small>
                 <small class="written">Caracteres escritos: ${writtenChars}</small>
                 <small class="difference">Diferencia: ${differenceCountDisplay.textContent}</small>
@@ -403,7 +461,17 @@
     `;
 
             navigator.clipboard.writeText(output);
-            alert("Contenido copiado al portapapeles como HTML.");
+            alert("contenido y data copiado al portapapeles como HTML");
+        });
+
+        // Función para copiar (copiar como texto plano)
+        copyButton.addEventListener("click", () => {
+
+            const content = writingArea.value.replace(/\n/g, "<br>");
+            const output = `${content}`;
+
+            navigator.clipboard.writeText(output);
+            alert("texto plano copiado al portapapeles como TXT");
         });
 
     </script>
