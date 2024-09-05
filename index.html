@@ -277,9 +277,6 @@
             document.getElementById('title').readOnly = 'readonly';
             document.getElementById('goal').readOnly = 'readonly';
 
-
-
-
             // Mostrar la sección de escritura
             writingSection.classList.remove("hidden");
             startButton.classList.add("hidden");
@@ -302,10 +299,10 @@
 
             if (isWriting) {
                 // Pausar
-                timesPausedArr.push(new Date());
+                timesPausedArr.push(new Date().toLocaleTimeString());
 
                 //apuntamos donde hemos pausado
-                document.getElementById('writingArea').value += `\n\npausado a las ${new Date().toISOString().split(".")[0].slice(11)}\n`;
+                document.getElementById('writingArea').value += `\n\npausado a las ${new Date().toLocaleTimeString()}\n`;
 
                 isPaused = true;
 
@@ -320,7 +317,7 @@
                 timesUnPausedArr.push(new Date());
 
                 //apuntamos donde hemos despausado
-                document.getElementById('writingArea').value += `des-pausado a las ${new Date().toISOString().split(".")[0].slice(11)}\n`;
+                document.getElementById('writingArea').value += `des-pausado a las ${new Date().toLocaleTimeString()}\n`;
 
                 isPaused = true;
 
@@ -338,7 +335,7 @@
             timesStoppedArr.push(new Date());
 
             //apuntamos donde hemos parado
-            document.getElementById('writingArea').value += `\n\nparado a las ${new Date().toISOString().split(".")[0].slice(11)}\n`;
+            document.getElementById('writingArea').value += `\n\nparado a las ${new Date().toLocaleTimeString()}\n`;
 
             writingArea.disabled = true;
             stopButton.classList.add("hidden");
@@ -357,7 +354,7 @@
             timesUnStoppedArr.push(new Date());
 
             //apuntamos donde hemos des-parado
-            document.getElementById('writingArea').value += `des-parado a las ${new Date().toISOString().split(".")[0].slice(11)}\n`;
+            document.getElementById('writingArea').value += `des-parado a las ${new Date().toLocaleTimeString()}\n`;
 
             unstopButton.classList.add("hidden");
             copyButton.classList.add("hidden");
