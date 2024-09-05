@@ -295,8 +295,6 @@
                     document.getElementById('emoji-counters').textContent += "⏹️"
                 }
 
-                console.log(`${pauses}, ${stops}`);
-
                 document.getElementById("title").value = title;
                 document.getElementById("goal").value = goal;
 
@@ -315,8 +313,14 @@
                 startButton.classList.add("hidden");
                 loadTextButton.classList.add("hidden");
 
-                startTime = startDate
-
+                //startTime = startDate;
+                //console.log (startDate);
+                startTimeDisplay.textContent = startDate;
+                //y si quieres que sea la fecha de ahora mismo activa esto: 
+                /*
+                startTime = new Date();
+                startTimeDisplay.textContent = `${startTime.toLocaleTimeString()}`
+                */
                 writingArea.disabled = false;
                 isWriting = true;
 
@@ -459,7 +463,7 @@
             console.log(continuationDate);
 
             if (continuationDate == 0) {
-             output = `
+                output = `
         <article class="escrito">
             <h3 class="titulo">${title}</h3>
             <p>${content}</p>
@@ -475,9 +479,9 @@
                 <small class="difference">Diferencia: ${differenceCountDisplay.textContent}</small>
             </div>
         </article>
-    `; 
+    `;
             } else {
-             output = `
+                output = `
         <article class="escrito">
             <h3 class="titulo">${title}</h3>
             <p>${content}</p>
@@ -494,7 +498,7 @@
                 <small class="difference">Diferencia: ${differenceCountDisplay.textContent}</small>
             </div>
         </article>
-    `; 
+    `;
             }
 
             navigator.clipboard.writeText(output);
@@ -526,4 +530,23 @@
                 <small class="difference">Diferencia: -21354</small>
             </div>
         </article>
+
+
+        
+        <article class="escrito">
+            <h3 class="titulo">bon dia test</h3>
+            <p>me gusta mcuhio escribir aunque espera un momento...<br><br>pausado a las 15:57:59<br>des-pausado a las 15:58:01<br><br>vale ay no voy a cagar<br><br>pausado a las 15:58:07<br><br><br>parado a las 16:01:33<br>des-parado a las 16:01:35<br>des-pausado a las 16:01:37<br><br><br>parado a las 16:01:43<br></p>
+            <div class="data">
+                <small class="startDate">Creado: 5/9/2024, 15:57:50</small>
+                <small class="stopDate">Parado: 5/9/2024, 16:01:45</small>
+                <small class="pauses">Pausas: 2</small>
+                <small class="stops">Paradas: 1</small>
+                <small class="time">Tiempo total: 3 minutes, 54 seconds</small>
+                <small class="time">Tiempo real: </small>
+                <small class="goal">Objetivo de caracteres: 20</small>
+                <small class="written">Caracteres escritos: 127</small>
+                <small class="difference">Diferencia: 107</small>
+            </div>
+        </article>
+    
     -->
