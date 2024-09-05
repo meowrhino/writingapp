@@ -10,7 +10,6 @@
         body {
             font-family: 'Georgia', serif;
             background-color: #f0efe5;
-            /* Color de fondo más suave, similar al papel */
             background-image: radial-gradient(#bfae9d 0.5px, #f0efe5 0.5px);
             background-size: 15px 15px;
             margin: 0;
@@ -29,7 +28,6 @@
             color: #4b3f31;
         }
 
-        /* Contenedor principal */
         .container {
             background-color: rgba(255, 255, 245, 0.95);
             border-radius: 15px;
@@ -42,7 +40,6 @@
             align-items: center;
         }
 
-        /* Estilos de los inputs */
         .input-container {
             background-color: #4b3f31;
             padding: 20px;
@@ -71,7 +68,6 @@
             font-size: 16px;
         }
 
-        /* Botones centrados */
         button {
             padding: 12px 24px;
             background-color: #d1a77d;
@@ -94,7 +90,6 @@
             display: none;
         }
 
-        /* Estilos del área de texto */
         textarea {
             width: 95%;
             height: 250px;
@@ -114,7 +109,6 @@
             border-color: #b7b6b3;
         }
 
-        /* Estilos de los contadores */
         .counters,
         .time-tracker {
             margin-bottom: 20px;
@@ -137,7 +131,6 @@
             color: green;
         }
 
-        /* Estilos de los contadores de emojis */
         .emoji-counters {
             display: flex;
             justify-content: space-around;
@@ -156,15 +149,12 @@
             display: hidden;
         }
 
-        /*quitar las arrows del input de numeros para que cuando lo centres se centre bien*/
-        /* Chrome, Safari, Edge, Opera */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
 
-        /* Firefox */
         input[type=number] {
             -moz-appearance: textfield;
         }
@@ -189,10 +179,12 @@
             <input type="number" id="goal" placeholder="text lenght">
         </div>
 
-        <button id="startButton">start writing</button>
+        <div>
+            <button id="startButton">start writing</button>
+            <button id="loadTextButton">continue writing</button>
+        </div>
 
         <div class="hidden" id="writingSection">
-
             <textarea id="writingArea" placeholder="..." class="paused" disabled=""></textarea>
 
             <div class="counters">
@@ -202,20 +194,15 @@
             </div>
 
             <div class="buttons" style="text-align: center">
-
                 <button id="pauseResumeButton">pause</button>
                 <button id="stopButton">stop</button>
-
-                <!-- Botones de Des-parar e Imprimir ocultos por defecto, se mostrarán al parar -->
                 <button id="unstopButton" class="hidden">go back</button>
                 <button id="copyButton" class="hidden">copy text</button>
                 <button id="printButton" class="hidden">print</button>
             </div>
         </div>
 
-        <!-- Contadores de pausas y paradas usando solo emojis -->
-        <div id="emoji-counters">
-        </div>
+        <div id="emoji-counters"></div>
 
     </div>
 
@@ -223,13 +210,13 @@
         // Variables globales
         let isWriting = false;
         let isPaused = false;
-
         let startTime;
-        let negativelostTime
-
+        let continuationDate = 0;
+        let negativelostTime;
         let writtenChars = 0;
 
         const startButton = document.getElementById("startButton");
+        const loadTextButton = document.getElementById("loadTextButton");
         const pauseResumeButton = document.getElementById("pauseResumeButton");
         const stopButton = document.getElementById("stopButton");
         const unstopButton = document.getElementById("unstopButton");
@@ -243,24 +230,16 @@
         const writtenCountDisplay = document.getElementById("writtenCount");
         const differenceCountDisplay = document.getElementById("differenceCount");
 
-        let timesPausedArr = new Array();
-        let timesUnPausedArr = new Array();
-        let timesStoppedArr = new Array();
-        let timesUnStoppedArr = new Array();
-
+        let timesPausedArr = [];
+        let timesUnPausedArr = [];
+        let timesStoppedArr = [];
+        let timesUnStoppedArr = [];
 
         // Función para iniciar la escritura
-        //coge los valores de title y goal 
         startButton.addEventListener("click", () => {
-
             let title = document.getElementById("title").value;
             let goal = document.getElementById("goal").value;
 
-            //molaria que ya que te lo pone en negrita también te lo ponga separado en los miles
-            //igual los de abajo también
-            //document.getElementById("goal").value = goal.toLocaleString
-
-            //y si no los tiene los pone en 0
             if (!title) {
                 title = "";
             }
@@ -269,7 +248,6 @@
                 goal = 0;
             }
 
-            //centrar y hacer bold el titulo y el objetivo
             document.getElementById('title').style.textAlign = 'center';
             document.getElementById('goal').style.textAlign = 'center';
             document.getElementById('title').style.fontWeight = 'bold';
@@ -277,50 +255,95 @@
             document.getElementById('title').readOnly = 'readonly';
             document.getElementById('goal').readOnly = 'readonly';
 
-            // Mostrar la sección de escritura
             writingSection.classList.remove("hidden");
             startButton.classList.add("hidden");
+            loadTextButton.classList.add("hidden");
 
-            // Mostrar la hora de inicio
             startTime = new Date();
             startTimeDisplay.textContent = `${startTime.toLocaleTimeString()}`;
 
-            // Habilitar el área de escritura
             writingArea.disabled = false;
             isWriting = true;
 
-            // Actualizar objetivo
             goalCountDisplay.textContent = goal;
             updateCharacterCounts();
         });
 
-        // Función de Pausar/Reanudar
+        // Cargar texto pegado
+        loadTextButton.addEventListener("click", () => {
+            let pastedContent = prompt("Pega aquí el texto HTML previamente guardado:");
+
+            if (pastedContent) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(pastedContent, 'text/html');
+
+                // Cargar valores
+                const title = doc.querySelector(".titulo").textContent;
+                const content = doc.querySelector("p").innerHTML.replace(/<br>/g, "\n");
+                const goal = doc.querySelector(".goal").textContent.split(": ")[1];
+                const written = doc.querySelector(".written").textContent.split(": ")[1];
+                const difference = doc.querySelector(".difference").textContent.split(": ")[1];
+                const pauses = doc.querySelector(".pauses").textContent.split(": ")[1];
+                const stops = doc.querySelector(".stops").textContent.split(": ")[1];
+                const startDate = doc.querySelector(".startDate").textContent.split(": ")[1];
+
+                for (let i = 0; i < pauses; i++) {
+                    document.getElementById('emoji-counters').textContent += "⏸️"
+                }
+
+                for (let i = 0; i < stops; i++) {
+                    document.getElementById('emoji-counters').textContent += "⏹️"
+                }
+
+                console.log(`${pauses}, ${stops}`);
+
+                document.getElementById("title").value = title;
+                document.getElementById("goal").value = goal;
+
+                document.getElementById('title').style.textAlign = 'center';
+                document.getElementById('goal').style.textAlign = 'center';
+                document.getElementById('title').style.fontWeight = 'bold';
+                document.getElementById('goal').style.fontWeight = 'bold';
+                document.getElementById('title').readOnly = 'readonly';
+                document.getElementById('goal').readOnly = 'readonly';
+
+                writingArea.value = content;
+                writingArea.value += `\ncontinuado el ${new Date().toLocaleDateString()}\n`;
+                writingArea.value += `a las ${new Date().toLocaleTimeString()}\n`;
+
+                writingSection.classList.remove("hidden");
+                startButton.classList.add("hidden");
+                loadTextButton.classList.add("hidden");
+
+                startTime = startDate
+
+                writingArea.disabled = false;
+                isWriting = true;
+
+                goalCountDisplay.textContent = goal;
+                //writtenCountDisplay.textContent = written;
+                //differenceCountDisplay.textContent = difference;
+
+                updateCharacterCounts();
+            }
+        });
+
         pauseResumeButton.addEventListener("click", () => {
-
             if (isWriting) {
-                // Pausar
                 timesPausedArr.push(new Date().toLocaleTimeString());
-
-                //apuntamos donde hemos pausado
                 document.getElementById('writingArea').value += `\n\npausado a las ${new Date().toLocaleTimeString()}\n`;
-
                 isPaused = true;
 
                 writingArea.classList.add("paused");
                 writingArea.disabled = true;
 
                 pauseResumeButton.textContent = "un-pause";
-
                 document.getElementById('emoji-counters').textContent += "⏸️";
             } else {
-                // Reanudar
                 timesUnPausedArr.push(new Date());
-
-                //apuntamos donde hemos despausado
                 document.getElementById('writingArea').value += `des-pausado a las ${new Date().toLocaleTimeString()}\n`;
 
                 isPaused = true;
-
                 writingArea.classList.remove("paused");
                 writingArea.disabled = false;
 
@@ -330,18 +353,14 @@
             isWriting = !isWriting;
         });
 
-        // Función para parar la escritura
         stopButton.addEventListener("click", () => {
             timesStoppedArr.push(new Date());
-
-            //apuntamos donde hemos parado
             document.getElementById('writingArea').value += `\n\nparado a las ${new Date().toLocaleTimeString()}\n`;
 
             writingArea.disabled = true;
             stopButton.classList.add("hidden");
             pauseResumeButton.classList.add("hidden");
 
-            // Mostrar botones de des-parar, copiar e imprimir
             unstopButton.classList.remove("hidden");
             copyButton.classList.remove("hidden");
             printButton.classList.remove("hidden");
@@ -365,8 +384,8 @@
 
             //para que cuando lo des-pares pero siga pausado no se abra el writingArea
             if (isPaused === false) {
-            writingArea.disabled = false;
-        }
+                writingArea.disabled = false;
+            }
         });
 
         // Función para manejar el área de escritura
@@ -377,7 +396,6 @@
             writtenChars = writingArea.value.length;
 
             writtenCountDisplay.textContent = writtenChars;
-
             const difference = writtenChars - goal;
             differenceCountDisplay.textContent = difference;
 
@@ -390,7 +408,6 @@
             }
         }
 
-        // Función para dar formato a los segundos (horas minutos segundos)
         function secondsToHms(d) {
             d = Number(d);
             var h = Math.floor(d / 3600);
@@ -407,7 +424,6 @@
             negativelostTime = 0;
 
             if (timesUnPausedArr.length > 0) {
-
                 for (let i = 1; i <= timesUnPausedArr.length; i++) {
                     negativelostTime += Math.floor((timesPausedArr[i - 1] - timesUnPausedArr[i - 1]) / 1000);
                 }
@@ -422,30 +438,34 @@
             return negativelostTime;
         }
 
-        // Función para imprimir (copiar como HTML)
         printButton.addEventListener("click", () => {
             const title = document.getElementById("title").value;
             const content = writingArea.value.replace(/\n/g, "<br>");
-            const endTime = new Date();  // Momento en que se imprime
+            const endTime = new Date();
 
-            // Convertimos totaltime de milisegundos a segundos correctamente
+            if (typeof startDate !== 'undefined') {
+                continuationDate = new Date();
+            }
+
             const totalTime = secondsToHms(Math.floor((endTime - startTime) / 1000));
-
             calculateNegativeLostTime();
 
             const realTime = secondsToHms(Math.floor((endTime - startTime) / 1000) + negativelostTime);
             let timesStopped = timesUnStoppedArr.length;
             let timesPaused = timesPausedArr.length;
 
+            let output = 0;
 
-            const output = `
-            
+            console.log(continuationDate);
+
+            if (continuationDate == 0) {
+             output = `
         <article class="escrito">
             <h3 class="titulo">${title}</h3>
             <p>${content}</p>
             <div class="data">
-                <small class="date">Creado: ${startTime.toLocaleString()}</small>
-                <small class="date">Parado: ${endTime.toLocaleString()}</small>
+                <small class="startDate">Creado: ${startTime.toLocaleString()}</small>
+                <small class="stopDate">Parado: ${endTime.toLocaleString()}</small>
                 <small class="pauses">Pausas: ${timesPaused}</small>
                 <small class="stops">Paradas: ${timesStopped}</small>
                 <small class="time">Tiempo total: ${totalTime}</small>
@@ -455,24 +475,55 @@
                 <small class="difference">Diferencia: ${differenceCountDisplay.textContent}</small>
             </div>
         </article>
-    `;
+    `; 
+            } else {
+             output = `
+        <article class="escrito">
+            <h3 class="titulo">${title}</h3>
+            <p>${content}</p>
+            <div class="data">
+                <small class="startDate">Creado: ${startTime.toLocaleString()}</small>
+                <small class="continuedDate">Continuado: ${continuationDate.toLocaleString()}</small>
+                <small class="stopDate">Parado: ${endTime.toLocaleString()}</small>
+                <small class="pauses">Pausas: ${timesPaused}</small>
+                <small class="stops">Paradas: ${timesStopped}</small>
+                <small class="time">Tiempo total: ${totalTime}</small>
+                <small class="time">Tiempo real: ${realTime}</small>
+                <small class="goal">Objetivo de caracteres: ${goalCountDisplay.textContent}</small>
+                <small class="written">Caracteres escritos: ${writtenChars}</small>
+                <small class="difference">Diferencia: ${differenceCountDisplay.textContent}</small>
+            </div>
+        </article>
+    `; 
+            }
 
             navigator.clipboard.writeText(output);
             alert("contenido y data copiado al portapapeles como HTML");
         });
-
-        // Función para copiar (copiar como texto plano)
-        copyButton.addEventListener("click", () => {
-
-            const content = writingArea.value.replace(/\n/g, "<br>");
-            const output = `${content}`;
-
-            navigator.clipboard.writeText(output);
-            alert("texto plano copiado al portapapeles como TXT");
-        });
-
     </script>
 
 </body>
 
 </html>
+
+
+
+
+<!--  
+    texto para probar la función de load
+        <article class="escrito">
+            <h3 class="titulo">intento de hablar del pasado</h3>
+            <p><br><br>parado a las 16:42:42<br>des-parado a las 16:43:42<br><br>recuerdo que la última vez que pensé en ésto pensé en la espera<br><br>recuerdo que mucha de mi infancia y adolescencia consistía en éso, en la espera. recuerdo esperar a que dani volviese a conectarse cuando desaparecía. esperaba que los veranos se acabasen para dejar de estar donde no quería estar y volver a mi ciudad. recuerdo esperar que mi padre no me quitase las cosas que me daba, y que cuando las recuperaba él no me dijese que las había robado. <br><br>siempre he tenido problemas con la propiedad, y supongo que uno de los posibles orígenes es aquí<br><br>parado a las 16:46:30<br>des-parado a las 16:49:43<br><br>pero cuando escribí, o no sé si fue que hablé con rikamichi sobre ésto recuerdo pensar en el patio que había en el centro inglés en la zona infantil. recuerdo mucha mucha arena muy blanca, el árbol que por algún motivo sangraba savia y tenía muchas hormigas, recuerdo algún dia haberlas seguido por la arena del patio hacia donde comenzaba la pared, y verlas subir y bajar e ir de un sitio a otro y preguntarme qué hacían, a dónde iban y qué querían, en general. recuerdo fascinarme de alguna manera por todo ésto.<br><br>recuerdo también cuando tenía un reloj de lego y que la profesora, creo que se llamaba fiona, me lo quitó porque jugaba con él en clase. también recuerdo ejercicios de escribir, como estos de escribir 10 veces la letra R en mayúscula en grande y en como 10 cuadraditos repartidos en el espacio de ese cuaderno finito grapado A5. <br><br>recuerdo que en cuarto de primaria un compañero me aconsejó que no cruzase las piernas en clase, que éso era de chicas y que si no lo hacía me tratarían mejor. recuerdo comenzar a morderme las uñas porque una chica que recuerdo se llamaba laura empezó a hacerlo y me apeteció imitarlo. recuerdo que un día escupí una uña<br><br>recuerdo que mi madre me metió futbol sala para que tuviese más amigos, o para que mejorase mi reputación, o algo. siempre he tenido muy buena suerte en las primeras partidas que hago de cualquier cosa. el primer día rebotó la pelota con mi espalda y acabó resultando en un pase que fue un gol. recuerdo que de repente todo el mundo me hablaba y recuerdo pensar que era pura casualidad, pero que tenía que intentarlo, y recuerdo que cuando volví al siguiente día o al siguiente me daba mucho miedo la pelota, me daba mucho miedo la pelota Y RECUERDO, muy vívidamente, cerrar los ojos a ver si podía controlarla con la mente.<br><br>cuando una profe me castigó por hacer la misma bomba de papel que manolo e intenté que sonase pero no sonaba (escribir)<br><br>cuando estaba mirando por el escenario y giré la cabeza para ver y miriam pasó por en medio y se pensó, o se inventó, que le estaba mirando las bragas. recuerdo cuando me junte con clara a jugar a las muñecas. y al día siguiente acercarme a buscarla pero alejarme al último momento.<br>recuerdo algo con celia martin, como un dia que corrimos pro todo el patio chillando lo más agudo que podíamos, no recuerdo quien ganaba pero recuerdo que reímos muchísimo. recuerdo quitarme y enseñarle los aparatos de los dientes a alguien, y recuerdo un mercadillo con piñones como currency (el patio estaba lleno de pinos, pues estaba construído en el pinar que rodea al puerto de santa maría y que constantemente se tala para edificar)<br><br>recuerdo el grupito de imanol, alex, alfredo y raquel. recuerdo que un dia yendo de un lado a otro del patio se reían, o algo así, de mí. recuerdo un día que me chivé a miss peña porque no me dejaban jugar con ellos y les obligó a jugar conmigo, y recuerdo sentirme raro por ello. recuerdo que nuestro acuerdo era que yo les daba chuches a cambio de jugar con ellos, y darles chuches que me daban o que pedía a mis padres o a mi abuela<br><br>recuerdo cuando manolo me timó y me cambió una canica de tamaño grande por 2 de tamaño mediano y 4 de tamaño pequeño, aludiendo a que su suma era equivalente a la canica grande (x2pequeño = x1mediano y x2mediano = 1grande.) recuerdo acceder y cambiar esa canica con líneas curvadas como de megaevolución amarillas que me gustaba tanto, y luego arrepentirme, intentar recuperarla y no conseguirlo. creo que mis padres me preguntaron por esa canica, pero no recuerdo si hicieron algo más que preguntar.<br><br>recuerdo cuando raquel no me invitó a su cumple que lloré y lloré en mi cama y mis padres estaban conmigo y les dije, que era verdad, que ella me dijo que podía ir aunque no tuviese invitación, y no recuerdo si acabé yendo o no. recuerdo vagamente ir, pero no sé si fue un sueño o no.<br><br>recuerdo cuando mis padres se divorciaron pensar en cambiar de colegio como algo horrible, porque prefería "malo conocido a bueno por conocer" o algo así. recuerdo, de verdad, te juro que recuerdo alguna forma de ese refrán en mi cabeza.<br><br>pausado a las 17:05:33<br>des-pausado a las 17:05:35<br><br><br><br>pausado a las 17:05:59<br>des-pausado a las 17:07:23<br><br>y recuerdo contarle esto a alfredo en la clase de plástica, donde hacía unos días me habían hecho la broma de quitarme la silla cuando me iba a sentar, y recuerdo esas mesas hexagonales donde cabían como niño y medio por cada lado y que no entendiese su reacción<br><br>recuerdo cuando años más tarde imanol y alex me hacían bulling por tuenti, como cuando les pasé la canción de moon por algún motivo y se rieron de miku y me enfadó. recuerdo hablarlo con mery y con tania y con sora en el grupito de messenger que teníamos de vocaloid family y crear https://lasparanoiasdelosmancos.blogspot.com/ donde publicábamos lo tontos que eran, y aventuras nuestras en general. recuerdo a maddy y todas las etapas que tuvimos de ser mejores amigos a cuando se volvió loca, recuerdo cuando pasó una foto con un pentagrama en rojo en la sangre que decía que le había salido tras hacer algo que me dió mucho miedo, y recuerdo nunca entender si era algo cierto o no. pff recuerdo mil cosas de ese grupo de messenger, recuerdo jugar al WoW Core con ellas y hacer mil cosas, y publicar algunas aventuras que teníamos, sobretodo con bugs de ese servidor que casi no funcionaba y tenía mil problemas... recuerdo que se llevaban ligeramente mal con adri y que adri, que era mi compi de clase, me lo iba contando, y recuerdo no terminar de entenderlo y meterme con él. recuerdo cuando en 2o de secundaria la madre de adri leyó nuestra conversación de messenger y <br><br>pausado a las 17:29:47<br>des-pausado a las 17:31:54<br><br>se agobió porque se pensó que adri y yo estábamos saliendo... menuda tía la teresa le tengo mucho cariño aunque nunca sepa cómo o si decírselo, espero que de alguna manera le llegue ésto.<br><br><br><br><br>pausado a las 17:34:09<br>des-pausado a las 17:34:11<br><br><br><br>pausado a las 17:34:15<br>des-pausado a las 17:34:16<br><br><br><br>pausado a las 17:34:25<br>des-pausado a las 17:35:14<br><br><br>parado a las 17:35:16<br></p>
+            <div class="data">
+                <small class="startDate">Creado: 31/8/2024, 18:40:54</small>
+                <small class="date">Parado: 31/8/2024, 19:35:44</small>
+                <small class="pauses">Pausas: 6</small>
+                <small class="stops">Paradas: 2</small>
+                <small class="time">Tiempo total: 54 minutes, 50 seconds</small>
+                <small class="time">Tiempo real: 46 minutes, 9 seconds</small>
+                <small class="goal">Objetivo de caracteres: 28000</small>
+                <small class="written">Caracteres escritos: 6646</small>
+                <small class="difference">Diferencia: -21354</small>
+            </div>
+        </article>
+    -->
