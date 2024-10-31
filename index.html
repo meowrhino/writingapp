@@ -176,7 +176,7 @@
             <input type="text" id="title" placeholder="text title">
 
             <label for="goal"></label>
-            <input type="number" id="goal" placeholder="text lenght">
+            <input type="number" id="goal" placeholder="text length">
         </div>
 
         <div>
@@ -199,6 +199,7 @@
                 <button id="unstopButton" class="hidden">go back</button>
                 <button id="copyButton" class="hidden">copy text</button>
                 <button id="printButton" class="hidden">print</button>
+                <button id="downloadButton" class="hidden">download</button>
             </div>
         </div>
 
@@ -222,6 +223,7 @@
         const unstopButton = document.getElementById("unstopButton");
         const printButton = document.getElementById("printButton");
         const copyButton = document.getElementById("copyButton");
+        const downloadButton = document.getElementById("downloadButton");
         const writingArea = document.getElementById("writingArea");
         const writingSection = document.getElementById("writingSection");
         const startTimeDisplay = document.getElementById("startTime");
@@ -234,6 +236,10 @@
         let timesUnPausedArr = [];
         let timesStoppedArr = [];
         let timesUnStoppedArr = [];
+
+        // Mostrar los botones de print y download
+        printButton.classList.remove("hidden");
+        downloadButton.classList.remove("hidden");
 
         // Función para iniciar la escritura
         startButton.addEventListener("click", () => {
@@ -313,20 +319,11 @@
                 startButton.classList.add("hidden");
                 loadTextButton.classList.add("hidden");
 
-                //startTime = startDate;
-                //console.log (startDate);
                 startTimeDisplay.textContent = startDate;
-                //y si quieres que sea la fecha de ahora mismo activa esto: 
-                /*
-                startTime = new Date();
-                startTimeDisplay.textContent = `${startTime.toLocaleTimeString()}`
-                */
                 writingArea.disabled = false;
                 isWriting = true;
 
                 goalCountDisplay.textContent = goal;
-                //writtenCountDisplay.textContent = written;
-                //differenceCountDisplay.textContent = difference;
 
                 updateCharacterCounts();
             }
@@ -368,6 +365,7 @@
             unstopButton.classList.remove("hidden");
             copyButton.classList.remove("hidden");
             printButton.classList.remove("hidden");
+            downloadButton.classList.remove("hidden");
 
             document.getElementById('emoji-counters').textContent += "⏹️";
         });
@@ -376,17 +374,16 @@
         unstopButton.addEventListener("click", () => {
             timesUnStoppedArr.push(new Date());
 
-            //apuntamos donde hemos des-parado
             document.getElementById('writingArea').value += `des-parado a las ${new Date().toLocaleTimeString()}\n`;
 
             unstopButton.classList.add("hidden");
             copyButton.classList.add("hidden");
             printButton.classList.add("hidden");
+            downloadButton.classList.add("hidden");
 
             stopButton.classList.remove("hidden");
             pauseResumeButton.classList.remove("hidden");
 
-            //para que cuando lo des-pares pero siga pausado no se abra el writingArea
             if (isPaused === false) {
                 writingArea.disabled = false;
             }
@@ -460,8 +457,6 @@
 
             let output = 0;
 
-            console.log(continuationDate);
-
             if (continuationDate == 0) {
                 output = `
         <article class="escrito">
@@ -504,49 +499,9 @@
             navigator.clipboard.writeText(output);
             alert("contenido y data copiado al portapapeles como HTML");
         });
+
     </script>
 
 </body>
 
 </html>
-
-
-
-
-<!--  
-    texto para probar la función de load
-        <article class="escrito">
-            <h3 class="titulo">intento de hablar del pasado</h3>
-            <p><br><br>parado a las 16:42:42<br>des-parado a las 16:43:42<br><br>recuerdo que la última vez que pensé en ésto pensé en la espera<br><br>recuerdo que mucha de mi infancia y adolescencia consistía en éso, en la espera. recuerdo esperar a que dani volviese a conectarse cuando desaparecía. esperaba que los veranos se acabasen para dejar de estar donde no quería estar y volver a mi ciudad. recuerdo esperar que mi padre no me quitase las cosas que me daba, y que cuando las recuperaba él no me dijese que las había robado. <br><br>siempre he tenido problemas con la propiedad, y supongo que uno de los posibles orígenes es aquí<br><br>parado a las 16:46:30<br>des-parado a las 16:49:43<br><br>pero cuando escribí, o no sé si fue que hablé con rikamichi sobre ésto recuerdo pensar en el patio que había en el centro inglés en la zona infantil. recuerdo mucha mucha arena muy blanca, el árbol que por algún motivo sangraba savia y tenía muchas hormigas, recuerdo algún dia haberlas seguido por la arena del patio hacia donde comenzaba la pared, y verlas subir y bajar e ir de un sitio a otro y preguntarme qué hacían, a dónde iban y qué querían, en general. recuerdo fascinarme de alguna manera por todo ésto.<br><br>recuerdo también cuando tenía un reloj de lego y que la profesora, creo que se llamaba fiona, me lo quitó porque jugaba con él en clase. también recuerdo ejercicios de escribir, como estos de escribir 10 veces la letra R en mayúscula en grande y en como 10 cuadraditos repartidos en el espacio de ese cuaderno finito grapado A5. <br><br>recuerdo que en cuarto de primaria un compañero me aconsejó que no cruzase las piernas en clase, que éso era de chicas y que si no lo hacía me tratarían mejor. recuerdo comenzar a morderme las uñas porque una chica que recuerdo se llamaba laura empezó a hacerlo y me apeteció imitarlo. recuerdo que un día escupí una uña<br><br>recuerdo que mi madre me metió futbol sala para que tuviese más amigos, o para que mejorase mi reputación, o algo. siempre he tenido muy buena suerte en las primeras partidas que hago de cualquier cosa. el primer día rebotó la pelota con mi espalda y acabó resultando en un pase que fue un gol. recuerdo que de repente todo el mundo me hablaba y recuerdo pensar que era pura casualidad, pero que tenía que intentarlo, y recuerdo que cuando volví al siguiente día o al siguiente me daba mucho miedo la pelota, me daba mucho miedo la pelota Y RECUERDO, muy vívidamente, cerrar los ojos a ver si podía controlarla con la mente.<br><br>cuando una profe me castigó por hacer la misma bomba de papel que manolo e intenté que sonase pero no sonaba (escribir)<br><br>cuando estaba mirando por el escenario y giré la cabeza para ver y miriam pasó por en medio y se pensó, o se inventó, que le estaba mirando las bragas. recuerdo cuando me junte con clara a jugar a las muñecas. y al día siguiente acercarme a buscarla pero alejarme al último momento.<br>recuerdo algo con celia martin, como un dia que corrimos pro todo el patio chillando lo más agudo que podíamos, no recuerdo quien ganaba pero recuerdo que reímos muchísimo. recuerdo quitarme y enseñarle los aparatos de los dientes a alguien, y recuerdo un mercadillo con piñones como currency (el patio estaba lleno de pinos, pues estaba construído en el pinar que rodea al puerto de santa maría y que constantemente se tala para edificar)<br><br>recuerdo el grupito de imanol, alex, alfredo y raquel. recuerdo que un dia yendo de un lado a otro del patio se reían, o algo así, de mí. recuerdo un día que me chivé a miss peña porque no me dejaban jugar con ellos y les obligó a jugar conmigo, y recuerdo sentirme raro por ello. recuerdo que nuestro acuerdo era que yo les daba chuches a cambio de jugar con ellos, y darles chuches que me daban o que pedía a mis padres o a mi abuela<br><br>recuerdo cuando manolo me timó y me cambió una canica de tamaño grande por 2 de tamaño mediano y 4 de tamaño pequeño, aludiendo a que su suma era equivalente a la canica grande (x2pequeño = x1mediano y x2mediano = 1grande.) recuerdo acceder y cambiar esa canica con líneas curvadas como de megaevolución amarillas que me gustaba tanto, y luego arrepentirme, intentar recuperarla y no conseguirlo. creo que mis padres me preguntaron por esa canica, pero no recuerdo si hicieron algo más que preguntar.<br><br>recuerdo cuando raquel no me invitó a su cumple que lloré y lloré en mi cama y mis padres estaban conmigo y les dije, que era verdad, que ella me dijo que podía ir aunque no tuviese invitación, y no recuerdo si acabé yendo o no. recuerdo vagamente ir, pero no sé si fue un sueño o no.<br><br>recuerdo cuando mis padres se divorciaron pensar en cambiar de colegio como algo horrible, porque prefería "malo conocido a bueno por conocer" o algo así. recuerdo, de verdad, te juro que recuerdo alguna forma de ese refrán en mi cabeza.<br><br>pausado a las 17:05:33<br>des-pausado a las 17:05:35<br><br><br><br>pausado a las 17:05:59<br>des-pausado a las 17:07:23<br><br>y recuerdo contarle esto a alfredo en la clase de plástica, donde hacía unos días me habían hecho la broma de quitarme la silla cuando me iba a sentar, y recuerdo esas mesas hexagonales donde cabían como niño y medio por cada lado y que no entendiese su reacción<br><br>recuerdo cuando años más tarde imanol y alex me hacían bulling por tuenti, como cuando les pasé la canción de moon por algún motivo y se rieron de miku y me enfadó. recuerdo hablarlo con mery y con tania y con sora en el grupito de messenger que teníamos de vocaloid family y crear https://lasparanoiasdelosmancos.blogspot.com/ donde publicábamos lo tontos que eran, y aventuras nuestras en general. recuerdo a maddy y todas las etapas que tuvimos de ser mejores amigos a cuando se volvió loca, recuerdo cuando pasó una foto con un pentagrama en rojo en la sangre que decía que le había salido tras hacer algo que me dió mucho miedo, y recuerdo nunca entender si era algo cierto o no. pff recuerdo mil cosas de ese grupo de messenger, recuerdo jugar al WoW Core con ellas y hacer mil cosas, y publicar algunas aventuras que teníamos, sobretodo con bugs de ese servidor que casi no funcionaba y tenía mil problemas... recuerdo que se llevaban ligeramente mal con adri y que adri, que era mi compi de clase, me lo iba contando, y recuerdo no terminar de entenderlo y meterme con él. recuerdo cuando en 2o de secundaria la madre de adri leyó nuestra conversación de messenger y <br><br>pausado a las 17:29:47<br>des-pausado a las 17:31:54<br><br>se agobió porque se pensó que adri y yo estábamos saliendo... menuda tía la teresa le tengo mucho cariño aunque nunca sepa cómo o si decírselo, espero que de alguna manera le llegue ésto.<br><br><br><br><br>pausado a las 17:34:09<br>des-pausado a las 17:34:11<br><br><br><br>pausado a las 17:34:15<br>des-pausado a las 17:34:16<br><br><br><br>pausado a las 17:34:25<br>des-pausado a las 17:35:14<br><br><br>parado a las 17:35:16<br></p>
-            <div class="data">
-                <small class="startDate">Creado: 31/8/2024, 18:40:54</small>
-                <small class="date">Parado: 31/8/2024, 19:35:44</small>
-                <small class="pauses">Pausas: 6</small>
-                <small class="stops">Paradas: 2</small>
-                <small class="time">Tiempo total: 54 minutes, 50 seconds</small>
-                <small class="time">Tiempo real: 46 minutes, 9 seconds</small>
-                <small class="goal">Objetivo de caracteres: 28000</small>
-                <small class="written">Caracteres escritos: 6646</small>
-                <small class="difference">Diferencia: -21354</small>
-            </div>
-        </article>
-
-
-        
-        <article class="escrito">
-            <h3 class="titulo">bon dia test</h3>
-            <p>me gusta mcuhio escribir aunque espera un momento...<br><br>pausado a las 15:57:59<br>des-pausado a las 15:58:01<br><br>vale ay no voy a cagar<br><br>pausado a las 15:58:07<br><br><br>parado a las 16:01:33<br>des-parado a las 16:01:35<br>des-pausado a las 16:01:37<br><br><br>parado a las 16:01:43<br></p>
-            <div class="data">
-                <small class="startDate">Creado: 5/9/2024, 15:57:50</small>
-                <small class="stopDate">Parado: 5/9/2024, 16:01:45</small>
-                <small class="pauses">Pausas: 2</small>
-                <small class="stops">Paradas: 1</small>
-                <small class="time">Tiempo total: 3 minutes, 54 seconds</small>
-                <small class="time">Tiempo real: </small>
-                <small class="goal">Objetivo de caracteres: 20</small>
-                <small class="written">Caracteres escritos: 127</small>
-                <small class="difference">Diferencia: 107</small>
-            </div>
-        </article>
-    
-    -->
