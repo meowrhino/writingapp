@@ -500,6 +500,77 @@
             alert("contenido y data copiado al portapapeles como HTML");
         });
 
+        // Función para descargar el HTML generado
+        downloadButton.addEventListener("click", () => {
+            const title = document.getElementById("title").value;
+            const content = writingArea.value.replace(/\n/g, "<br>");
+            const endTime = new Date();
+            const dateParts = [endTime.getFullYear(), endTime.getMonth() + 1, endTime.getDate(), endTime.getHours(), endTime.getMinutes()];
+            const fileName = `${dateParts.join('_')}.html`;
+
+            if (typeof startDate !== 'undefined') {
+                continuationDate = new Date();
+            }
+
+            const totalTime = secondsToHms(Math.floor((endTime - startTime) / 1000));
+            calculateNegativeLostTime();
+
+            const realTime = secondsToHms(Math.floor((endTime - startTime) / 1000) + negativelostTime);
+            let timesStopped = timesUnStoppedArr.length;
+            let timesPaused = timesPausedArr.length;
+
+            let output = 0;
+
+            if (continuationDate == 0) {
+                output = `
+        <article class="escrito">
+            <h3 class="titulo">${title}</h3>
+            <p>${content}</p>
+            <div class="data">
+                <small class="startDate">Creado: ${startTime.toLocaleString()}</small>
+                <small class="stopDate">Parado: ${endTime.toLocaleString()}</small>
+                <small class="pauses">Pausas: ${timesPaused}</small>
+                <small class="stops">Paradas: ${timesStopped}</small>
+                <small class="time">Tiempo total: ${totalTime}</small>
+                <small class="time">Tiempo real: ${realTime}</small>
+                <small class="goal">Objetivo de caracteres: ${goalCountDisplay.textContent}</small>
+                <small class="written">Caracteres escritos: ${writtenChars}</small>
+                <small class="difference">Diferencia: ${differenceCountDisplay.textContent}</small>
+            </div>
+        </article>
+    `;
+            } else {
+                output = `
+        <article class="escrito">
+            <h3 class="titulo">${title}</h3>
+            <p>${content}</p>
+            <div class="data">
+                <small class="startDate">Creado: ${startTime.toLocaleString()}</small>
+                <small class="continuedDate">Continuado: ${continuationDate.toLocaleString()}</small>
+                <small class="stopDate">Parado: ${endTime.toLocaleString()}</small>
+                <small class="pauses">Pausas: ${timesPaused}</small>
+                <small class="stops">Paradas: ${timesStopped}</small>
+                <small class="time">Tiempo total: ${totalTime}</small>
+                <small class="time">Tiempo real: ${realTime}</small>
+                <small class="goal">Objetivo de caracteres: ${goalCountDisplay.textContent}</small>
+                <small class="written">Caracteres escritos: ${writtenChars}</small>
+                <small class="difference">Diferencia: ${differenceCountDisplay.textContent}</small>
+            </div>
+        </article>
+    `;
+            }
+
+            const blob = new Blob([output], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
     </script>
 
 </body>
